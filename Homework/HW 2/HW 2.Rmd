@@ -1,0 +1,77 @@
+---
+title: "Lab 2 Homework"
+author: "Jonathan Sunkari"
+date: "2023-01-17"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. A vector in R is essentially a list, which can be assigned to an object by the syntax "obj <- c(x,y,z)"
+
+2. A data matrix is multiple vectors together, or a vector of multiple vectors. 
+
+3. 
+```{r}
+spring_1 <- c(36.25, 35.40, 35.30)
+spring_2 <- c(35.15, 35.35, 33.35)
+spring_3 <- c(30.70, 29.65, 29.20)
+spring_4 <- c(39.70, 40.05, 38.65)
+spring_5 <- c(31.85, 31.40, 29.30)
+spring_6 <- c(30.20, 30.65, 29.75)
+spring_7 <- c(32.90, 32.50, 32.80)
+spring_8 <- c(36.80, 36.45, 33.15)
+```
+
+4 and 5. 
+```{r}
+scientists <- c('Jill', 'Steve', 'Susan')
+springs_data <- c(spring_1,spring_2,spring_3,spring_4,spring_5,spring_6,spring_7,spring_8)
+
+spring_matrix <- matrix(springs_data, nrow=8, byrow=TRUE)
+
+springs <- c('Bluebell Spring', 'Opal Spring', 'Riverside Spring', 'Too Hot Spring', 'Mystery Spring', 'Emerald Spring', 'Black Spring', 'Pearl Spring')
+
+colnames(spring_matrix) <- scientists
+row.names(spring_matrix) <- springs
+
+spring_matrix
+
+```
+
+6. 
+```{r}
+mean_temp <- rowMeans(spring_matrix)
+mean_temp
+```
+
+7. 
+```{r}
+spring_matrix <- cbind(spring_matrix, mean_temp)
+spring_matrix
+```
+
+8. 
+```{r}
+spring_matrix["Opal Spring", "Susan"]
+```
+
+9. 
+```{r}
+Jill_values <- spring_matrix[springs, "Jill"]
+Jill_mean <- mean(Jill_values)
+Jill_mean 
+```
+
+10. 
+Mean for Susan's values: 
+```{r}
+Susan_values <- spring_matrix[springs, "Susan"]
+Susan_mean <- mean(Susan_values)
+Susan_mean
+```
+
