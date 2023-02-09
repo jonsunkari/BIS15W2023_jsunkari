@@ -11,9 +11,9 @@
 
 <meta name="author" content="Jonathan Sunkari" />
 
-<meta name="date" content="2023-02-02" />
+<meta name="date" content="2023-02-09" />
 
-<title>Lab 6 Homework</title>
+<title>Lab 8 Homework</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -374,9 +374,9 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Lab 6 Homework</h1>
+<h1 class="title toc-ignore">Lab 8 Homework</h1>
 <h4 class="author">Jonathan Sunkari</h4>
-<h4 class="date">2023-02-02</h4>
+<h4 class="date">2023-02-09</h4>
 
 </div>
 
@@ -395,1253 +395,193 @@ report neat and clean!</p>
 <div id="load-the-libraries" class="section level2">
 <h2>Load the libraries</h2>
 <pre class="r"><code>library(tidyverse)
-library(janitor)
-library(skimr)</code></pre>
-<p>For this assignment we are going to work with a large data set from
-the <a href="http://www.fao.org/about/en/">United Nations Food and
-Agriculture Organization</a> on world fisheries. These data are pretty
-wild, so we need to do some cleaning. First, load the data.</p>
-<p>Load the data <code>FAO_1950to2012_111914.csv</code> as a new object
-titled <code>fisheries</code>.</p>
-<pre class="r"><code>fisheries &lt;- readr::read_csv(file = &quot;FAO_1950to2012_111914.csv&quot;)</code></pre>
-<pre><code>## Rows: 17692 Columns: 71
+library(janitor)</code></pre>
+</div>
+<div id="install-here" class="section level2">
+<h2>Install <code>here</code></h2>
+<p>The package <code>here</code> is a nice option for keeping
+directories clear when loading files. I will demonstrate below and let
+you decide if it is something you want to use.</p>
+<pre class="r"><code>#install.packages(&quot;here&quot;)</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>For this homework, we will use a data set compiled by the Office of
+Environment and Heritage in New South Whales, Australia. It contains the
+enterococci counts in water samples obtained from Sydney beaches as part
+of the Beachwatch Water Quality Program. Enterococci are bacteria common
+in the intestines of mammals; they are rarely present in clean water.
+So, enterococci values are a measurement of pollution. <code>cfu</code>
+stands for colony forming units and measures the number of viable
+bacteria in a sample <a href="https://en.wikipedia.org/wiki/Colony-forming_unit">cfu</a>.</p>
+<p>This homework loosely follows the tutorial of <a href="https://rladiessydney.org/">R Ladies Sydney</a>. If you get stuck,
+check it out!</p>
+<ol style="list-style-type: decimal">
+<li>Start by loading the data <code>sydneybeaches</code>. Do some
+exploratory analysis to get an idea of the data structure.</li>
+</ol>
+<pre class="r"><code>beaches &lt;- readr::read_csv(&quot;sydneybeaches.csv&quot;)</code></pre>
+<pre><code>## Rows: 3690 Columns: 8
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
-## chr (69): Country, Common name, ISSCAAP taxonomic group, ASFIS species#, ASF...
-## dbl  (2): ISSCAAP group#, FAO major fishing area
+## chr (4): Region, Council, Site, Date
+## dbl (4): BeachId, Longitude, Latitude, Enterococci (cfu/100ml)
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<ol style="list-style-type: decimal">
-<li>Do an exploratory analysis of the data (your choice). What are the
-names of the variables, what are the dimensions, are there any NA’s,
-what are the classes of the variables?</li>
-</ol>
-<pre class="r"><code>dim(fisheries)</code></pre>
-<pre><code>## [1] 17692    71</code></pre>
-<pre class="r"><code>str(fisheries)</code></pre>
-<pre><code>## spc_tbl_ [17,692 × 71] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
-##  $ Country                : chr [1:17692] &quot;Albania&quot; &quot;Albania&quot; &quot;Albania&quot; &quot;Albania&quot; ...
-##  $ Common name            : chr [1:17692] &quot;Angelsharks, sand devils nei&quot; &quot;Atlantic bonito&quot; &quot;Barracudas nei&quot; &quot;Blue and red shrimp&quot; ...
-##  $ ISSCAAP group#         : num [1:17692] 38 36 37 45 32 37 33 45 38 57 ...
-##  $ ISSCAAP taxonomic group: chr [1:17692] &quot;Sharks, rays, chimaeras&quot; &quot;Tunas, bonitos, billfishes&quot; &quot;Miscellaneous pelagic fishes&quot; &quot;Shrimps, prawns&quot; ...
-##  $ ASFIS species#         : chr [1:17692] &quot;10903XXXXX&quot; &quot;1750100101&quot; &quot;17710001XX&quot; &quot;2280203101&quot; ...
-##  $ ASFIS species name     : chr [1:17692] &quot;Squatinidae&quot; &quot;Sarda sarda&quot; &quot;Sphyraena spp&quot; &quot;Aristeus antennatus&quot; ...
-##  $ FAO major fishing area : num [1:17692] 37 37 37 37 37 37 37 37 37 37 ...
-##  $ Measure                : chr [1:17692] &quot;Quantity (tonnes)&quot; &quot;Quantity (tonnes)&quot; &quot;Quantity (tonnes)&quot; &quot;Quantity (tonnes)&quot; ...
-##  $ 1950                   : chr [1:17692] NA NA NA NA ...
-##  $ 1951                   : chr [1:17692] NA NA NA NA ...
-##  $ 1952                   : chr [1:17692] NA NA NA NA ...
-##  $ 1953                   : chr [1:17692] NA NA NA NA ...
-##  $ 1954                   : chr [1:17692] NA NA NA NA ...
-##  $ 1955                   : chr [1:17692] NA NA NA NA ...
-##  $ 1956                   : chr [1:17692] NA NA NA NA ...
-##  $ 1957                   : chr [1:17692] NA NA NA NA ...
-##  $ 1958                   : chr [1:17692] NA NA NA NA ...
-##  $ 1959                   : chr [1:17692] NA NA NA NA ...
-##  $ 1960                   : chr [1:17692] NA NA NA NA ...
-##  $ 1961                   : chr [1:17692] NA NA NA NA ...
-##  $ 1962                   : chr [1:17692] NA NA NA NA ...
-##  $ 1963                   : chr [1:17692] NA NA NA NA ...
-##  $ 1964                   : chr [1:17692] NA NA NA NA ...
-##  $ 1965                   : chr [1:17692] NA NA NA NA ...
-##  $ 1966                   : chr [1:17692] NA NA NA NA ...
-##  $ 1967                   : chr [1:17692] NA NA NA NA ...
-##  $ 1968                   : chr [1:17692] NA NA NA NA ...
-##  $ 1969                   : chr [1:17692] NA NA NA NA ...
-##  $ 1970                   : chr [1:17692] NA NA NA NA ...
-##  $ 1971                   : chr [1:17692] NA NA NA NA ...
-##  $ 1972                   : chr [1:17692] NA NA NA NA ...
-##  $ 1973                   : chr [1:17692] NA NA NA NA ...
-##  $ 1974                   : chr [1:17692] NA NA NA NA ...
-##  $ 1975                   : chr [1:17692] NA NA NA NA ...
-##  $ 1976                   : chr [1:17692] NA NA NA NA ...
-##  $ 1977                   : chr [1:17692] NA NA NA NA ...
-##  $ 1978                   : chr [1:17692] NA NA NA NA ...
-##  $ 1979                   : chr [1:17692] NA NA NA NA ...
-##  $ 1980                   : chr [1:17692] NA NA NA NA ...
-##  $ 1981                   : chr [1:17692] NA NA NA NA ...
-##  $ 1982                   : chr [1:17692] NA NA NA NA ...
-##  $ 1983                   : chr [1:17692] NA NA NA NA ...
-##  $ 1984                   : chr [1:17692] NA NA NA NA ...
-##  $ 1985                   : chr [1:17692] NA NA NA NA ...
-##  $ 1986                   : chr [1:17692] NA NA NA NA ...
-##  $ 1987                   : chr [1:17692] NA NA NA NA ...
-##  $ 1988                   : chr [1:17692] NA NA NA NA ...
-##  $ 1989                   : chr [1:17692] NA NA NA NA ...
-##  $ 1990                   : chr [1:17692] NA NA NA NA ...
-##  $ 1991                   : chr [1:17692] NA NA NA NA ...
-##  $ 1992                   : chr [1:17692] NA NA NA NA ...
-##  $ 1993                   : chr [1:17692] NA NA NA NA ...
-##  $ 1994                   : chr [1:17692] NA NA NA NA ...
-##  $ 1995                   : chr [1:17692] &quot;0 0&quot; &quot;1&quot; NA &quot;0 0&quot; ...
-##  $ 1996                   : chr [1:17692] &quot;53&quot; &quot;2&quot; NA &quot;3&quot; ...
-##  $ 1997                   : chr [1:17692] &quot;20&quot; &quot;0 0&quot; NA &quot;0 0&quot; ...
-##  $ 1998                   : chr [1:17692] &quot;31&quot; &quot;12&quot; NA NA ...
-##  $ 1999                   : chr [1:17692] &quot;30&quot; &quot;30&quot; NA NA ...
-##  $ 2000                   : chr [1:17692] &quot;30&quot; &quot;25&quot; &quot;2&quot; NA ...
-##  $ 2001                   : chr [1:17692] &quot;16&quot; &quot;30&quot; NA NA ...
-##  $ 2002                   : chr [1:17692] &quot;79&quot; &quot;24&quot; NA &quot;34&quot; ...
-##  $ 2003                   : chr [1:17692] &quot;1&quot; &quot;4&quot; NA &quot;22&quot; ...
-##  $ 2004                   : chr [1:17692] &quot;4&quot; &quot;2&quot; &quot;2&quot; &quot;15&quot; ...
-##  $ 2005                   : chr [1:17692] &quot;68&quot; &quot;23&quot; &quot;4&quot; &quot;12&quot; ...
-##  $ 2006                   : chr [1:17692] &quot;55&quot; &quot;30&quot; &quot;7&quot; &quot;18&quot; ...
-##  $ 2007                   : chr [1:17692] &quot;12&quot; &quot;19&quot; NA NA ...
-##  $ 2008                   : chr [1:17692] &quot;23&quot; &quot;27&quot; NA NA ...
-##  $ 2009                   : chr [1:17692] &quot;14&quot; &quot;21&quot; NA NA ...
-##  $ 2010                   : chr [1:17692] &quot;78&quot; &quot;23&quot; &quot;7&quot; NA ...
-##  $ 2011                   : chr [1:17692] &quot;12&quot; &quot;12&quot; NA NA ...
-##  $ 2012                   : chr [1:17692] &quot;5&quot; &quot;5&quot; NA NA ...
-##  - attr(*, &quot;spec&quot;)=
-##   .. cols(
-##   ..   Country = col_character(),
-##   ..   `Common name` = col_character(),
-##   ..   `ISSCAAP group#` = col_double(),
-##   ..   `ISSCAAP taxonomic group` = col_character(),
-##   ..   `ASFIS species#` = col_character(),
-##   ..   `ASFIS species name` = col_character(),
-##   ..   `FAO major fishing area` = col_double(),
-##   ..   Measure = col_character(),
-##   ..   `1950` = col_character(),
-##   ..   `1951` = col_character(),
-##   ..   `1952` = col_character(),
-##   ..   `1953` = col_character(),
-##   ..   `1954` = col_character(),
-##   ..   `1955` = col_character(),
-##   ..   `1956` = col_character(),
-##   ..   `1957` = col_character(),
-##   ..   `1958` = col_character(),
-##   ..   `1959` = col_character(),
-##   ..   `1960` = col_character(),
-##   ..   `1961` = col_character(),
-##   ..   `1962` = col_character(),
-##   ..   `1963` = col_character(),
-##   ..   `1964` = col_character(),
-##   ..   `1965` = col_character(),
-##   ..   `1966` = col_character(),
-##   ..   `1967` = col_character(),
-##   ..   `1968` = col_character(),
-##   ..   `1969` = col_character(),
-##   ..   `1970` = col_character(),
-##   ..   `1971` = col_character(),
-##   ..   `1972` = col_character(),
-##   ..   `1973` = col_character(),
-##   ..   `1974` = col_character(),
-##   ..   `1975` = col_character(),
-##   ..   `1976` = col_character(),
-##   ..   `1977` = col_character(),
-##   ..   `1978` = col_character(),
-##   ..   `1979` = col_character(),
-##   ..   `1980` = col_character(),
-##   ..   `1981` = col_character(),
-##   ..   `1982` = col_character(),
-##   ..   `1983` = col_character(),
-##   ..   `1984` = col_character(),
-##   ..   `1985` = col_character(),
-##   ..   `1986` = col_character(),
-##   ..   `1987` = col_character(),
-##   ..   `1988` = col_character(),
-##   ..   `1989` = col_character(),
-##   ..   `1990` = col_character(),
-##   ..   `1991` = col_character(),
-##   ..   `1992` = col_character(),
-##   ..   `1993` = col_character(),
-##   ..   `1994` = col_character(),
-##   ..   `1995` = col_character(),
-##   ..   `1996` = col_character(),
-##   ..   `1997` = col_character(),
-##   ..   `1998` = col_character(),
-##   ..   `1999` = col_character(),
-##   ..   `2000` = col_character(),
-##   ..   `2001` = col_character(),
-##   ..   `2002` = col_character(),
-##   ..   `2003` = col_character(),
-##   ..   `2004` = col_character(),
-##   ..   `2005` = col_character(),
-##   ..   `2006` = col_character(),
-##   ..   `2007` = col_character(),
-##   ..   `2008` = col_character(),
-##   ..   `2009` = col_character(),
-##   ..   `2010` = col_character(),
-##   ..   `2011` = col_character(),
-##   ..   `2012` = col_character()
-##   .. )
-##  - attr(*, &quot;problems&quot;)=&lt;externalptr&gt;</code></pre>
-<pre class="r"><code>names(fisheries)</code></pre>
-<pre><code>##  [1] &quot;Country&quot;                 &quot;Common name&quot;            
-##  [3] &quot;ISSCAAP group#&quot;          &quot;ISSCAAP taxonomic group&quot;
-##  [5] &quot;ASFIS species#&quot;          &quot;ASFIS species name&quot;     
-##  [7] &quot;FAO major fishing area&quot;  &quot;Measure&quot;                
-##  [9] &quot;1950&quot;                    &quot;1951&quot;                   
-## [11] &quot;1952&quot;                    &quot;1953&quot;                   
-## [13] &quot;1954&quot;                    &quot;1955&quot;                   
-## [15] &quot;1956&quot;                    &quot;1957&quot;                   
-## [17] &quot;1958&quot;                    &quot;1959&quot;                   
-## [19] &quot;1960&quot;                    &quot;1961&quot;                   
-## [21] &quot;1962&quot;                    &quot;1963&quot;                   
-## [23] &quot;1964&quot;                    &quot;1965&quot;                   
-## [25] &quot;1966&quot;                    &quot;1967&quot;                   
-## [27] &quot;1968&quot;                    &quot;1969&quot;                   
-## [29] &quot;1970&quot;                    &quot;1971&quot;                   
-## [31] &quot;1972&quot;                    &quot;1973&quot;                   
-## [33] &quot;1974&quot;                    &quot;1975&quot;                   
-## [35] &quot;1976&quot;                    &quot;1977&quot;                   
-## [37] &quot;1978&quot;                    &quot;1979&quot;                   
-## [39] &quot;1980&quot;                    &quot;1981&quot;                   
-## [41] &quot;1982&quot;                    &quot;1983&quot;                   
-## [43] &quot;1984&quot;                    &quot;1985&quot;                   
-## [45] &quot;1986&quot;                    &quot;1987&quot;                   
-## [47] &quot;1988&quot;                    &quot;1989&quot;                   
-## [49] &quot;1990&quot;                    &quot;1991&quot;                   
-## [51] &quot;1992&quot;                    &quot;1993&quot;                   
-## [53] &quot;1994&quot;                    &quot;1995&quot;                   
-## [55] &quot;1996&quot;                    &quot;1997&quot;                   
-## [57] &quot;1998&quot;                    &quot;1999&quot;                   
-## [59] &quot;2000&quot;                    &quot;2001&quot;                   
-## [61] &quot;2002&quot;                    &quot;2003&quot;                   
-## [63] &quot;2004&quot;                    &quot;2005&quot;                   
-## [65] &quot;2006&quot;                    &quot;2007&quot;                   
-## [67] &quot;2008&quot;                    &quot;2009&quot;                   
-## [69] &quot;2010&quot;                    &quot;2011&quot;                   
-## [71] &quot;2012&quot;</code></pre>
-<pre class="r"><code>skim(fisheries)</code></pre>
-<table>
-<caption>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td align="left">Name</td>
-<td align="left">fisheries</td>
-</tr>
-<tr class="even">
-<td align="left">Number of rows</td>
-<td align="left">17692</td>
-</tr>
-<tr class="odd">
-<td align="left">Number of columns</td>
-<td align="left">71</td>
-</tr>
-<tr class="even">
-<td align="left">_______________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Column type frequency:</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">character</td>
-<td align="left">69</td>
-</tr>
-<tr class="odd">
-<td align="left">numeric</td>
-<td align="left">2</td>
-</tr>
-<tr class="even">
-<td align="left">________________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Group variables</td>
-<td align="left">None</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: character</strong></p>
-<table>
-<colgroup>
-<col width="29%" />
-<col width="12%" />
-<col width="17%" />
-<col width="4%" />
-<col width="4%" />
-<col width="7%" />
-<col width="10%" />
-<col width="13%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
-<th align="right">n_unique</th>
-<th align="right">whitespace</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Country</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">4</td>
-<td align="right">25</td>
-<td align="right">0</td>
-<td align="right">204</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Common name</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">3</td>
-<td align="right">30</td>
-<td align="right">0</td>
-<td align="right">1553</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">ISSCAAP taxonomic group</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">5</td>
-<td align="right">36</td>
-<td align="right">0</td>
-<td align="right">30</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">ASFIS species#</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">10</td>
-<td align="right">13</td>
-<td align="right">0</td>
-<td align="right">1553</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">ASFIS species name</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">6</td>
-<td align="right">32</td>
-<td align="right">0</td>
-<td align="right">1548</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Measure</td>
-<td align="right">0</td>
-<td align="right">1.00</td>
-<td align="right">17</td>
-<td align="right">17</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1950</td>
-<td align="right">15561</td>
-<td align="right">0.12</td>
-<td align="right">1</td>
-<td align="right">6</td>
-<td align="right">0</td>
-<td align="right">513</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1951</td>
-<td align="right">15550</td>
-<td align="right">0.12</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">536</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1952</td>
-<td align="right">15501</td>
-<td align="right">0.12</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">553</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1953</td>
-<td align="right">15439</td>
-<td align="right">0.13</td>
-<td align="right">1</td>
-<td align="right">6</td>
-<td align="right">0</td>
-<td align="right">570</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1954</td>
-<td align="right">15417</td>
-<td align="right">0.13</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">588</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1955</td>
-<td align="right">15382</td>
-<td align="right">0.13</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">589</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1956</td>
-<td align="right">15331</td>
-<td align="right">0.13</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">633</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1957</td>
-<td align="right">15253</td>
-<td align="right">0.14</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">627</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1958</td>
-<td align="right">15138</td>
-<td align="right">0.14</td>
-<td align="right">1</td>
-<td align="right">6</td>
-<td align="right">0</td>
-<td align="right">643</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1959</td>
-<td align="right">15110</td>
-<td align="right">0.15</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">641</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1960</td>
-<td align="right">15016</td>
-<td align="right">0.15</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">673</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1961</td>
-<td align="right">14922</td>
-<td align="right">0.16</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">713</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1962</td>
-<td align="right">14801</td>
-<td align="right">0.16</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">729</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1963</td>
-<td align="right">14707</td>
-<td align="right">0.17</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">760</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1964</td>
-<td align="right">14349</td>
-<td align="right">0.19</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">759</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1965</td>
-<td align="right">14241</td>
-<td align="right">0.20</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">798</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1966</td>
-<td align="right">14187</td>
-<td align="right">0.20</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">801</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1967</td>
-<td align="right">14047</td>
-<td align="right">0.21</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">815</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1968</td>
-<td align="right">13963</td>
-<td align="right">0.21</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">829</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1969</td>
-<td align="right">13920</td>
-<td align="right">0.21</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">853</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1970</td>
-<td align="right">13113</td>
-<td align="right">0.26</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">1225</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1971</td>
-<td align="right">12925</td>
-<td align="right">0.27</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">1326</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1972</td>
-<td align="right">12749</td>
-<td align="right">0.28</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">1372</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1973</td>
-<td align="right">12673</td>
-<td align="right">0.28</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">1432</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1974</td>
-<td align="right">12583</td>
-<td align="right">0.29</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2601</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1975</td>
-<td align="right">12333</td>
-<td align="right">0.30</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2767</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1976</td>
-<td align="right">12177</td>
-<td align="right">0.31</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2804</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1977</td>
-<td align="right">12014</td>
-<td align="right">0.32</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2867</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1978</td>
-<td align="right">11847</td>
-<td align="right">0.33</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2901</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1979</td>
-<td align="right">11820</td>
-<td align="right">0.33</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2932</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1980</td>
-<td align="right">11747</td>
-<td align="right">0.34</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2956</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1981</td>
-<td align="right">11713</td>
-<td align="right">0.34</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">2996</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1982</td>
-<td align="right">11558</td>
-<td align="right">0.35</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3030</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1983</td>
-<td align="right">11453</td>
-<td align="right">0.35</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3031</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1984</td>
-<td align="right">11309</td>
-<td align="right">0.36</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3076</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1985</td>
-<td align="right">11212</td>
-<td align="right">0.37</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3161</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1986</td>
-<td align="right">11086</td>
-<td align="right">0.37</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3242</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1987</td>
-<td align="right">10930</td>
-<td align="right">0.38</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3255</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1988</td>
-<td align="right">10493</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3435</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1989</td>
-<td align="right">10435</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3425</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1990</td>
-<td align="right">10293</td>
-<td align="right">0.42</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3446</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1991</td>
-<td align="right">10364</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3420</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1992</td>
-<td align="right">10435</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3322</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1993</td>
-<td align="right">10522</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3313</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1994</td>
-<td align="right">10400</td>
-<td align="right">0.41</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3313</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1995</td>
-<td align="right">10148</td>
-<td align="right">0.43</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3329</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1996</td>
-<td align="right">9990</td>
-<td align="right">0.44</td>
-<td align="right">1</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">3358</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1997</td>
-<td align="right">9773</td>
-<td align="right">0.45</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3393</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">1998</td>
-<td align="right">9579</td>
-<td align="right">0.46</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3399</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">1999</td>
-<td align="right">9265</td>
-<td align="right">0.48</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3428</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2000</td>
-<td align="right">8899</td>
-<td align="right">0.50</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3481</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2001</td>
-<td align="right">8646</td>
-<td align="right">0.51</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3490</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2002</td>
-<td align="right">8590</td>
-<td align="right">0.51</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3507</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2003</td>
-<td align="right">8383</td>
-<td align="right">0.53</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3482</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2004</td>
-<td align="right">7977</td>
-<td align="right">0.55</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3505</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2005</td>
-<td align="right">7822</td>
-<td align="right">0.56</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3532</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2006</td>
-<td align="right">7699</td>
-<td align="right">0.56</td>
-<td align="right">1</td>
-<td align="right">9</td>
-<td align="right">0</td>
-<td align="right">3565</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2007</td>
-<td align="right">7589</td>
-<td align="right">0.57</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3551</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2008</td>
-<td align="right">7667</td>
-<td align="right">0.57</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3537</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2009</td>
-<td align="right">7573</td>
-<td align="right">0.57</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3572</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2010</td>
-<td align="right">7499</td>
-<td align="right">0.58</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3590</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">2011</td>
-<td align="right">7371</td>
-<td align="right">0.58</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3618</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">2012</td>
-<td align="right">7336</td>
-<td align="right">0.59</td>
-<td align="right">1</td>
-<td align="right">8</td>
-<td align="right">0</td>
-<td align="right">3609</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: numeric</strong></p>
-<table>
-<colgroup>
-<col width="27%" />
-<col width="11%" />
-<col width="16%" />
-<col width="7%" />
-<col width="7%" />
-<col width="3%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="5%" />
-<col width="7%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">p0</th>
-<th align="right">p25</th>
-<th align="right">p50</th>
-<th align="right">p75</th>
-<th align="right">p100</th>
-<th align="left">hist</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">ISSCAAP group#</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">37.38</td>
-<td align="right">7.88</td>
-<td align="right">11</td>
-<td align="right">33</td>
-<td align="right">36</td>
-<td align="right">38</td>
-<td align="right">77</td>
-<td align="left">▁▇▂▁▁</td>
-</tr>
-<tr class="even">
-<td align="left">FAO major fishing area</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">45.34</td>
-<td align="right">18.33</td>
-<td align="right">18</td>
-<td align="right">31</td>
-<td align="right">37</td>
-<td align="right">57</td>
-<td align="right">88</td>
-<td align="left">▇▇▆▃▃</td>
-</tr>
-</tbody>
-</table>
+<pre class="r"><code>summary(beaches)</code></pre>
+<pre><code>##     BeachId         Region            Council              Site          
+##  Min.   :22.00   Length:3690        Length:3690        Length:3690       
+##  1st Qu.:24.00   Class :character   Class :character   Class :character  
+##  Median :26.00   Mode  :character   Mode  :character   Mode  :character  
+##  Mean   :25.87                                                           
+##  3rd Qu.:27.40                                                           
+##  Max.   :29.00                                                           
+##                                                                          
+##    Longitude        Latitude          Date           Enterococci (cfu/100ml)
+##  Min.   :151.3   Min.   :-33.98   Length:3690        Min.   :   0.00        
+##  1st Qu.:151.3   1st Qu.:-33.95   Class :character   1st Qu.:   1.00        
+##  Median :151.3   Median :-33.92   Mode  :character   Median :   5.00        
+##  Mean   :151.3   Mean   :-33.93                      Mean   :  33.92        
+##  3rd Qu.:151.3   3rd Qu.:-33.90                      3rd Qu.:  17.00        
+##  Max.   :151.3   Max.   :-33.89                      Max.   :4900.00        
+##                                                      NA&#39;s   :29</code></pre>
+<pre class="r"><code>head(beaches)</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   BeachId Region                    Council  Site  Longi…¹ Latit…² Date  Enter…³
+##     &lt;dbl&gt; &lt;chr&gt;                     &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+## 1      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 02/0…      19
+## 2      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 06/0…       3
+## 3      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 12/0…       2
+## 4      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 18/0…      13
+## 5      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 30/0…       8
+## 6      25 Sydney City Ocean Beaches Randwic… Clov…    151.   -33.9 05/0…       7
+## # … with abbreviated variable names ¹​Longitude, ²​Latitude,
+## #   ³​`Enterococci (cfu/100ml)`</code></pre>
+<p>If you want to try <code>here</code>, first notice the output when
+you load the <code>here</code> library. It gives you information on the
+current working directory. You can then use it to easily and intuitively
+load files.</p>
+<pre class="r"><code>library(here)</code></pre>
+<pre><code>## here() starts at /cloud/project</code></pre>
+<pre class="r"><code>beaches_alt &lt;- read_csv(here(&quot;sydneybeaches.csv&quot;))</code></pre>
+<pre><code>## Rows: 3690 Columns: 8</code></pre>
+<pre><code>## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (4): Region, Council, Site, Date
+## dbl (4): BeachId, Longitude, Latitude, Enterococci (cfu/100ml)
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>The quotes show the folder structure from the root directory.</p>
+<pre class="r"><code>sydneybeaches &lt;-read_csv(here(&quot;sydneybeaches.csv&quot;)) %&gt;% janitor::clean_names()</code></pre>
+<pre><code>## Rows: 3690 Columns: 8
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (4): Region, Council, Site, Date
+## dbl (4): BeachId, Longitude, Latitude, Enterococci (cfu/100ml)
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li>Use <code>janitor</code> to rename the columns and make them easier
-to use. As part of this cleaning step, change <code>country</code>,
-<code>isscaap_group_number</code>, <code>asfis_species_number</code>,
-and <code>fao_major_fishing_area</code> to data class factor.</li>
+<li>Are these data “tidy” per the definitions of the tidyverse? How do
+you know? Are they in wide or long format?</li>
 </ol>
-<pre class="r"><code>fisheries &lt;- clean_names(fisheries)</code></pre>
-<pre class="r"><code>fisheries$country &lt;- as.factor(fisheries$country)
-fisheries$isscaap_group_number &lt;- as.factor(fisheries$isscaap_group_number)
-fisheries$asfis_species_number &lt;- as.factor(fisheries$asfis_species_number)
-fisheries$fao_major_fishing_area &lt;- as.factor(fisheries$fao_major_fishing_area)</code></pre>
-<p>We need to deal with the years because they are being treated as
-characters and start with an X. We also have the problem that the column
-names that are years actually represent data. We haven’t discussed tidy
-data yet, so here is some help. You should run this ugly chunk to
-transform the data for the rest of the homework. It will only work if
-you have used janitor to rename the variables in question 2!</p>
-<pre class="r"><code>fisheries_tidy &lt;- fisheries %&gt;% 
-  pivot_longer(-c(country,common_name,isscaap_group_number,isscaap_taxonomic_group,asfis_species_number,asfis_species_name,fao_major_fishing_area,measure),
-               names_to = &quot;year&quot;,
-               values_to = &quot;catch&quot;,
-               values_drop_na = TRUE) %&gt;% 
-  mutate(year= as.numeric(str_replace(year, &#39;x&#39;, &#39;&#39;))) %&gt;% 
-  mutate(catch= str_replace(catch, c(&#39; F&#39;), replacement = &#39;&#39;)) %&gt;% 
-  mutate(catch= str_replace(catch, c(&#39;...&#39;), replacement = &#39;&#39;)) %&gt;% 
-  mutate(catch= str_replace(catch, c(&#39;-&#39;), replacement = &#39;&#39;)) %&gt;% 
-  mutate(catch= str_replace(catch, c(&#39;0 0&#39;), replacement = &#39;&#39;))
-
-fisheries_tidy$catch &lt;- as.numeric(fisheries_tidy$catch)</code></pre>
+<p>No it is not tidy. Although each value has its own cell, each
+observation does not have its own row; you can see this in the way that
+the various beaches, for example, repeat over multiple rows. The data is
+in long format.</p>
 <ol start="3" style="list-style-type: decimal">
-<li>How many countries are represented in the data? Provide a count and
-list their names.</li>
+<li>We are only interested in the variables site, date, and
+enterococci_cfu_100ml. Make a new object focused on these variables
+only. Name the object <code>sydneybeaches_long</code></li>
 </ol>
-<pre class="r"><code>count(fisheries, country)</code></pre>
-<pre><code>## # A tibble: 204 × 2
-##    country                 n
-##    &lt;fct&gt;               &lt;int&gt;
-##  1 Albania                67
-##  2 Algeria                59
-##  3 American Samoa         32
-##  4 Angola                 88
-##  5 Anguilla                3
-##  6 Antigua and Barbuda    22
-##  7 Argentina             140
-##  8 Aruba                   5
-##  9 Australia             301
-## 10 Bahamas                14
-## # … with 194 more rows</code></pre>
-<p>204 unique countries.</p>
+<pre class="r"><code>sydneybeaches_long &lt;- select(sydneybeaches, &quot;site&quot;, &quot;date&quot;, &quot;enterococci_cfu_100ml&quot;)</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>Refocus the data only to include country, isscaap_taxonomic_group,
-asfis_species_name, asfis_species_number, year, catch.</li>
+<li>Pivot the data such that the dates are column names and each beach
+only appears once. Name the object <code>sydneybeaches_wide</code></li>
 </ol>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(country, isscaap_taxonomic_group, asfis_species_name, asfis_species_number, year, catch)</code></pre>
-<pre><code>## # A tibble: 376,771 × 6
-##    country isscaap_taxonomic_group asfis_species_name asfis_specie…¹  year catch
-##    &lt;fct&gt;   &lt;chr&gt;                   &lt;chr&gt;              &lt;fct&gt;          &lt;dbl&gt; &lt;dbl&gt;
-##  1 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      1995    NA
-##  2 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      1996    53
-##  3 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      1997    20
-##  4 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      1998    31
-##  5 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      1999    30
-##  6 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      2000    30
-##  7 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      2001    16
-##  8 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      2002    79
-##  9 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      2003     1
-## 10 Albania Sharks, rays, chimaeras Squatinidae        10903XXXXX      2004     4
-## # … with 376,761 more rows, and abbreviated variable name ¹​asfis_species_number</code></pre>
+<pre class="r"><code>sydneybeaches_wide &lt;- sydneybeaches_long %&gt;%
+  pivot_wider(names_from = &quot;date&quot;, values_from = &quot;enterococci_cfu_100ml&quot;)</code></pre>
 <ol start="5" style="list-style-type: decimal">
-<li>Based on the asfis_species_number, how many distinct fish species
-were caught as part of these data?</li>
+<li>Pivot the data back so that the dates are data and not column
+names.</li>
 </ol>
-<pre class="r"><code>count(fisheries_tidy, asfis_species_number)</code></pre>
-<pre><code>## # A tibble: 1,551 × 2
-##    asfis_species_number     n
-##    &lt;fct&gt;                &lt;int&gt;
-##  1 1020100101             103
-##  2 1020100201               2
-##  3 10201XXXXX              23
-##  4 1030300603              10
-##  5 10303XXXXX              54
-##  6 1050200201              45
-##  7 1050200301               4
-##  8 1050200502              26
-##  9 1060100301             119
-## 10 1060200501              23
-## # … with 1,541 more rows</code></pre>
-<p>1551 distinct species</p>
+<pre class="r"><code>sydneybeaches_wide &lt;- sydneybeaches_long %&gt;%
+  pivot_wider(names_from = &quot;site&quot;, values_from = &quot;enterococci_cfu_100ml&quot;)</code></pre>
 <ol start="6" style="list-style-type: decimal">
-<li>Which country had the largest overall catch in the year 2000?</li>
+<li>We haven’t dealt much with dates yet, but separate the date into
+columns day, month, and year. Do this on the
+<code>sydneybeaches_long</code> data.</li>
 </ol>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(country, catch, year) %&gt;%
-  filter(year == &quot;2000&quot;) %&gt;%
-  group_by(country)%&gt;%
-  summarize(catch_total=sum(catch, na.rm=T)) %&gt;% 
-  arrange(desc(catch_total))</code></pre>
-<pre><code>## # A tibble: 193 × 2
-##    country                  catch_total
-##    &lt;fct&gt;                          &lt;dbl&gt;
-##  1 China                          25899
-##  2 Russian Federation             12181
-##  3 United States of America       11762
-##  4 Japan                           8510
-##  5 Indonesia                       8341
-##  6 Peru                            7443
-##  7 Chile                           6906
-##  8 India                           6351
-##  9 Thailand                        6243
-## 10 Korea, Republic of              6124
-## # … with 183 more rows</code></pre>
-<p>China</p>
+<pre class="r"><code>sydneybeaches_long &lt;- sydneybeaches_long %&gt;%
+  separate(date, into=c(&quot;day&quot;, &quot;month&quot;, &quot;year&quot;), sep=&quot;/&quot;)</code></pre>
 <ol start="7" style="list-style-type: decimal">
-<li>Which country caught the most sardines (<em>Sardina pilchardus</em>)
-between the years 1990-2000?</li>
+<li>What is the average <code>enterococci_cfu_100ml</code> by year for
+each beach. Think about which data you will use- long or wide.</li>
 </ol>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(country, asfis_species_name, year, catch) %&gt;%
-  filter(asfis_species_name == &quot;Sardina pilchardus&quot;, between(year, 1990, 2000))%&gt;%
-  group_by(country) %&gt;%
-  summarize(catch_total=sum(catch, na.rm=T)) %&gt;% 
-  arrange(desc(catch_total))</code></pre>
-<pre><code>## # A tibble: 37 × 2
-##    country               catch_total
-##    &lt;fct&gt;                       &lt;dbl&gt;
-##  1 Morocco                      7470
-##  2 Spain                        3507
-##  3 Russian Federation           1639
-##  4 Ukraine                      1030
-##  5 France                        966
-##  6 Portugal                      818
-##  7 Greece                        528
-##  8 Italy                         507
-##  9 Serbia and Montenegro         478
-## 10 Denmark                       477
-## # … with 27 more rows</code></pre>
-<p>Morocco</p>
+<pre class="r"><code>sydneybeaches_long %&gt;% 
+  group_by(site, year) %&gt;% 
+  summarize(mean_enterococci_cfu_100ml=mean(enterococci_cfu_100ml, na.rm=T))</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;site&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<pre><code>## # A tibble: 66 × 3
+## # Groups:   site [11]
+##    site         year  mean_enterococci_cfu_100ml
+##    &lt;chr&gt;        &lt;chr&gt;                      &lt;dbl&gt;
+##  1 Bondi Beach  2013                        32.2
+##  2 Bondi Beach  2014                        11.1
+##  3 Bondi Beach  2015                        14.3
+##  4 Bondi Beach  2016                        19.4
+##  5 Bondi Beach  2017                        13.2
+##  6 Bondi Beach  2018                        22.9
+##  7 Bronte Beach 2013                        26.8
+##  8 Bronte Beach 2014                        17.5
+##  9 Bronte Beach 2015                        23.6
+## 10 Bronte Beach 2016                        61.3
+## # … with 56 more rows</code></pre>
 <ol start="8" style="list-style-type: decimal">
-<li>Which five countries caught the most cephalopods between
-2008-2012?</li>
+<li>Make the output from question 7 easier to read by pivoting it to
+wide format.</li>
 </ol>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(country, asfis_species_name, year, catch) %&gt;%
-  filter(asfis_species_name == &quot;Cephalopoda&quot;, between(year, 2008, 2012))%&gt;%
-  group_by(country) %&gt;%
-  summarize(catch_total=sum(catch, na.rm=T)) %&gt;% 
-  arrange(desc(catch_total))</code></pre>
-<pre><code>## # A tibble: 16 × 2
-##    country                  catch_total
-##    &lt;fct&gt;                          &lt;dbl&gt;
-##  1 India                            570
-##  2 China                            257
-##  3 Spain                            198
-##  4 Algeria                          162
-##  5 France                           101
-##  6 Mauritania                        90
-##  7 TimorLeste                        76
-##  8 Italy                             66
-##  9 Mozambique                        16
-## 10 Cambodia                          15
-## 11 Taiwan Province of China          13
-## 12 Madagascar                        11
-## 13 Croatia                            7
-## 14 Israel                             0
-## 15 Somalia                            0
-## 16 Viet Nam                           0</code></pre>
-<p>India<br />
-China<br />
-Spain<br />
-Algeria France</p>
+<pre class="r"><code>sydneybeaches_long %&gt;%
+  pivot_wider(names_from=year, values_from = enterococci_cfu_100ml) %&gt;%
+  group_by(site) %&gt;%
+  summarise(across(contains(&quot;20&quot;), mean, na.rm=T))</code></pre>
+<pre><code>## Warning: There was 1 warning in `summarise()`.
+## ℹ In argument: `across(contains(&quot;20&quot;), mean, na.rm = T)`.
+## ℹ In group 1: `site = &quot;Bondi Beach&quot;`.
+## Caused by warning:
+## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+## Supply arguments directly to `.fns` through an anonymous function instead.
+## 
+##   # Previously
+##   across(a:b, mean, na.rm = TRUE)
+## 
+##   # Now
+##   across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
+<pre><code>## # A tibble: 11 × 7
+##    site                    `2013` `2014` `2015` `2016` `2017` `2018`
+##    &lt;chr&gt;                    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+##  1 Bondi Beach              32.2   11.1   14.3    19.4  13.2   22.9 
+##  2 Bronte Beach             26.8   17.5   23.6    61.3  16.8   43.4 
+##  3 Clovelly Beach            9.28  13.8    8.82   11.3   7.93  10.6 
+##  4 Coogee Beach             39.7   52.6   40.3    59.5  20.7   21.6 
+##  5 Gordons Bay (East)       24.8   16.7   36.2    39.0  13.7   17.6 
+##  6 Little Bay Beach        122.    19.5   25.5    31.2  18.2   59.1 
+##  7 Malabar Beach           101.    54.5   66.9    91.0  49.8   38.0 
+##  8 Maroubra Beach           47.1    9.23  14.5    26.6  11.6    9.21
+##  9 South Maroubra Beach     39.3   14.9    8.25   10.7   8.26  12.5 
+## 10 South Maroubra Rockpool  96.4   40.6   47.3    59.3  46.9  112.  
+## 11 Tamarama Beach           29.7   39.6   57.0    50.3  20.4   15.5</code></pre>
 <ol start="9" style="list-style-type: decimal">
-<li>Which species had the highest catch total between 2008-2012? (hint:
-Osteichthyes is not a species)</li>
+<li>What was the most polluted beach in 2018?</li>
 </ol>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(asfis_species_name, year, catch) %&gt;%
-  filter(between(year, 2008, 2012))%&gt;%
-  group_by(asfis_species_name) %&gt;%
-  summarize(catch_total=sum(catch, na.rm=T)) %&gt;% 
-  arrange(desc(catch_total))</code></pre>
-<pre><code>## # A tibble: 1,472 × 2
-##    asfis_species_name    catch_total
-##    &lt;chr&gt;                       &lt;dbl&gt;
-##  1 Osteichthyes               107808
-##  2 Theragra chalcogramma       41075
-##  3 Engraulis ringens           35523
-##  4 Katsuwonus pelamis          32153
-##  5 Trichiurus lepturus         30400
-##  6 Clupea harengus             28527
-##  7 Thunnus albacares           20119
-##  8 Scomber japonicus           14723
-##  9 Gadus morhua                13253
-## 10 Thunnus alalunga            12019
-## # … with 1,462 more rows</code></pre>
-<p>Theragra chalcogramma (since Osteichthyes is not a valid species)</p>
+<p>South Maroubra Rockpool.</p>
 <ol start="10" style="list-style-type: decimal">
-<li>Use the data to do at least one analysis of your choice.</li>
+<li>Please complete the class project survey at: <a href="https://forms.gle/H2j69Z3ZtbLH3efW6">BIS 15L Group
+Project</a></li>
 </ol>
-<p>Which year had the most catches?</p>
-<pre class="r"><code>fisheries_tidy %&gt;%
-  select(year, catch) %&gt;%
-  group_by(year) %&gt;%
-  summarize(catch_total=sum(catch, na.rm=T)) %&gt;% 
-  arrange(desc(catch_total))</code></pre>
-<pre><code>## # A tibble: 63 × 2
-##     year catch_total
-##    &lt;dbl&gt;       &lt;dbl&gt;
-##  1  2007      268130
-##  2  2006      257669
-##  3  2001      257320
-##  4  2002      255807
-##  5  2012      255406
-##  6  2008      255013
-##  7  2004      254115
-##  8  2005      251877
-##  9  2009      251181
-## 10  2010      244839
-## # … with 53 more rows</code></pre>
-<p>2007 had the most catches</p>
 </div>
 <div id="push-your-final-code-to-github" class="section level2">
 <h2>Push your final code to GitHub!</h2>
