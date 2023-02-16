@@ -1,0 +1,123 @@
+---
+title: "Lab 10 Homework"
+author: "Jonathan Sunkari"
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    theme: spacelab
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+Answer the following questions and complete the exercises in RMarkdown. Please embed all of your code and push your final work to your repository. Your final lab report should be organized, clean, and run free from errors. Remember, you must remove the `#` for the included code chunks to run. Be sure to add your name to the author header above. For any included plots, make sure they are clearly labeled. You are free to use any plot type that you feel best communicates the results of your analysis.  
+
+Make sure to use the formatting conventions of RMarkdown to make your report neat and clean!  
+
+## Load the libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(here)
+library(naniar)
+``` 
+
+## Desert Ecology
+For this assignment, we are going to use a modified data set on [desert ecology](http://esapubs.org/archive/ecol/E090/118/). The data are from: S. K. Morgan Ernest, Thomas J. Valone, and James H. Brown. 2009. Long-term monitoring and experimental manipulation of a Chihuahuan Desert ecosystem near Portal, Arizona, USA. Ecology 90:1708.
+```{r}
+deserts <- read_csv("surveys_complete.csv")
+```
+
+1. Use the function(s) of your choice to get an idea of its structure, including how NA's are treated. Are the data tidy?  
+```{r}
+glimpse(deserts)
+is.na(deserts)
+head(deserts)
+```
+Yes, data seems tidy. 
+
+2. How many genera and species are represented in the data? What are the total number of observations? Which species is most/ least frequently sampled in the study?
+```{r}
+length(deserts$record_id)
+deserts %>%
+  #summarise(num_genera=n_distinct(genus))
+  #summarise(num_genera=n_distinct(species)) %>%
+  count(species) %>%
+  arrange(desc(n))
+```
+26 genera, 40 species, merriami is most sampled, 6 species are all sampled once. 34786 total observations.  
+
+3. What is the proportion of taxa included in this study? Show a table and plot that reflects this count.
+```{r}
+deserts %>%
+  tabyl(taxa) %>%
+  ggplot(aes(x=taxa, y=n)) + geom_col() + scale_y_log10() + labs(title="Proportion of individual taxa", y="log10(count)") 
+```
+
+
+4. For the taxa included in the study, use the fill option to show the proportion of individuals sampled by `plot_type.` 
+
+```{r}
+deserts %>%
+  ggplot(aes(x=taxa, fill=plot_type)) + geom_bar() +scale_y_log10() + labs(title="Proportion of Individuals by Plot Type", y="log10(count)")
+```
+
+
+5. What is the range of weight for each species included in the study? Remove any observations of weight that are NA so they do not show up in the plot.
+```{r}
+deserts %>%
+  filter(weight != "NA") %>%
+  ggplot(aes(x=species, y=weight))+geom_boxplot()+coord_flip()+labs(title="Weight by Species")
+```
+
+
+
+6. Add another layer to your answer from #4 using `geom_point` to get an idea of how many measurements were taken for each species.
+```{r}
+deserts %>%
+  ggplot(aes(x=taxa, fill=plot_type)) + geom_bar() +scale_y_log10() + labs(title="Proportion of Individuals by Plot Type", y="log10(count)")
+```
+
+
+7. [Dipodomys merriami](https://en.wikipedia.org/wiki/Merriam's_kangaroo_rat) is the most frequently sampled animal in the study. How have the number of observations of this species changed over the years included in the study?
+```{r}
+deserts %>%
+  filter(species_id=="DM") %>%
+  ggplot(aes(x=year))+geom_bar()
+```
+They've fluctuated a lot, there doesn't appear to be one single trend however. 
+
+8. What is the relationship between `weight` and `hindfoot` length? Consider whether or not over plotting is an issue.
+```{r}
+deserts %>%
+  ggplot(aes(x=weight, y=hindfoot_length, na.rm=T))+geom_point()
+```
+Yes, over plotting is an issue -- there are so many points that it is difficult to identify trends and hard to see distinct points. 
+
+9. Which two species have, on average, the highest weight? Once you have identified them, make a new column that is a ratio of `weight` to `hindfoot_length`. Make a plot that shows the range of this new ratio and fill by sex.
+```{r}
+deserts %>%
+  #group_by(species) %>%
+  #summarise(weights=mean(weight)) %>%
+  #arrange(desc(weights)) %>%
+  filter(species_id=="NL" | species_id=="DS") %>%
+  filter(sex!= "NA" & hindfoot_length!="NA" & weight != "NA") %>%
+  mutate("ratio" = weight/hindfoot_length) %>%
+  ggplot(aes(x=species_id, y=ratio, fill=sex))+geom_boxplot()+labs(title="Weight vs Hindfoot Lengths")
+```
+
+
+10. Make one plot of your choice! Make sure to include at least two of the aesthetics options you have learned.
+
+Plot the hindfoot length of species, filling in by sex: 
+```{r}
+deserts %>%
+  filter(species_id!= "NA" & sex!= "NA" & hindfoot_length!="NA") %>%
+  ggplot(aes(x=species_id, y=hindfoot_length, fill=sex))+geom_col()+scale_y_log10()+coord_flip()+labs(title="Hindfoot Length vs. Species ID")
+```
+
+## Push your final code to GitHub!
+Please be sure that you check the `keep md` file in the knit preferences. 
